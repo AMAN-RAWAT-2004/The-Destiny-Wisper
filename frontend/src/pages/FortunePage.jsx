@@ -1,9 +1,9 @@
-import { motion } from 'framer-motion'
-import html2canvas from 'html2canvas'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
-import { apiFetch } from '../lib/api.js'
-import { CrystalBall } from '../components/CrystalBall.jsx'
+import { motion } from "framer-motion"
+import html2canvas from "html2canvas"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { Link, useLocation, useParams } from "react-router-dom"
+import { apiFetch } from "../lib/api.js"
+import { CrystalBall } from "../components/CrystalBall.jsx"
 
 function Pill({ children }) {
   return (
@@ -27,38 +27,49 @@ export function FortunePage() {
   const loc = useLocation()
 
   const initial = useMemo(() => {
-    // From HomePage navigation: { fortune, qrCodeDataUrl }
-    if (loc.state && loc.state.fortune && loc.state.fortune.qrId === id) {
+    if (loc.state?.fortune?.qrId === id) {
       return loc.state
     }
     return null
   }, [loc.state, id])
 
   const [loading, setLoading] = useState(!initial)
-  const [error, setError] = useState('')
+  const [error, setError] = useState("")
   const [fortune, setFortune] = useState(initial?.fortune || null)
-  const [qrCodeDataUrl, setQrCodeDataUrl] = useState(initial?.qrCodeDataUrl || '')
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState(initial?.qrCodeDataUrl || "")
 
   const cardRef = useRef(null)
 
   useEffect(() => {
     let cancelled = false
+
     async function run() {
       if (initial) return
+
       setLoading(true)
-      setError('')
+      setError("")
+
       try {
         const data = await apiFetch(`/api/fortune/${id}`)
+
         if (cancelled) return
+
         setFortune(data?.fortune || null)
+
+        // If backend returns qr code
+        if (data?.qrCodeDataUrl) {
+          setQrCodeDataUrl(data.qrCodeDataUrl)
+        }
       } catch (err) {
         if (cancelled) return
-        setError(err?.message || 'Could not load fortune.')
+        setError(err?.message || "Could not load fortune.")
       } finally {
         if (!cancelled) setLoading(false)
       }
     }
+
     run()
+
     return () => {
       cancelled = true
     }
@@ -66,26 +77,30 @@ export function FortunePage() {
 
   async function downloadCard() {
     if (!cardRef.current) return
+
     const canvas = await html2canvas(cardRef.current, {
       backgroundColor: null,
       scale: 2,
     })
-    const dataUrl = canvas.toDataURL('image/png')
-    const a = document.createElement('a')
+
+    const dataUrl = canvas.toDataURL("image/png")
+
+    const a = document.createElement("a")
     a.href = dataUrl
-    a.download = `fortune-${fortune?.userName || 'destiny'}.png`
+    a.download = `fortune-${fortune?.userName || "destiny"}.png`
     a.click()
   }
 
   async function shareLink() {
     const url = window.location.href
-    const title = 'My Destiny Wisper Fortune'
-    const text = `I’m ${fortune?.zodiacSign}. Scan my fortune:`
+    const title = "My Destiny Wisper Fortune"
+    const text = `I’m ${fortune?.zodiacSign}. Discover my destiny.`
+
     if (navigator.share) {
       await navigator.share({ title, text, url })
     } else {
       await navigator.clipboard.writeText(url)
-      alert('Link copied to clipboard.')
+      alert("Link copied to clipboard")
     }
   }
 
@@ -103,8 +118,14 @@ export function FortunePage() {
   if (error || !fortune) {
     return (
       <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-white/70 backdrop-blur">
-        <div className="text-lg font-semibold text-white">Fortune not found</div>
-        <div className="mt-2">{error || 'This destiny message is missing.'}</div>
+        <div className="text-lg font-semibold text-white">
+          Fortune not found
+        </div>
+
+        <div className="mt-2">
+          {error || "This destiny message is missing."}
+        </div>
+
         <div className="mt-6">
           <Link
             to="/"
@@ -119,6 +140,8 @@ export function FortunePage() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-12">
+
+      {/* MAIN FORTUNE */}
       <motion.section
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -129,165 +152,131 @@ export function FortunePage() {
           <Pill>
             {fortune.userName} • {fortune.zodiacSign}
           </Pill>
-          <Pill>Lucky: {fortune.luckyNumbers?.slice(0, 3).join(', ')}</Pill>
-          <Pill>Created: {new Date(fortune.createdAt).toLocaleString()}</Pill>
+
+          <Pill>
+            Lucky: {fortune.luckyNumbers?.slice(0, 3).join(", ")}
+          </Pill>
+
+          <Pill>
+            Created: {new Date(fortune.createdAt).toLocaleString()}
+          </Pill>
         </div>
 
         <div className="mt-5 grid gap-4">
-          <Section title="Daily Horoscope">{fortune.dailyHoroscope}</Section>
+          <Section title="Daily Horoscope">
+            {fortune.dailyHoroscope}
+          </Section>
+
           <Section title="Love Compatibility">
             <div className="font-medium text-white">
               {fortune.loveCompatibilitySummary}
             </div>
           </Section>
-          <Section title="Marriage Prediction">{fortune.marriagePrediction}</Section>
-          <Section title="Career & Wealth">{fortune.careerWealth}</Section>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Section title="Lucky Numbers">
-              <div className="flex flex-wrap gap-2">
-                {fortune.luckyNumbers?.map((n) => (
-                  <span
-                    key={n}
-                    className="rounded-2xl border border-white/10 bg-white/5 px-3 py-1 text-sm text-white"
-                  >
-                    {n}
-                  </span>
-                ))}
-              </div>
-            </Section>
-            <Section title="Lucky Colors">
-              <div className="flex flex-wrap gap-2">
-                {fortune.luckyColors?.map((c) => (
-                  <span
-                    key={c}
-                    className="rounded-2xl border border-white/10 bg-white/5 px-3 py-1 text-sm text-white"
-                  >
-                    {c}
-                  </span>
-                ))}
-              </div>
-            </Section>
-            <Section title="Lucky Days">
-              <div className="flex flex-wrap gap-2">
-                {fortune.luckyDays?.map((d) => (
-                  <span
-                    key={d}
-                    className="rounded-2xl border border-white/10 bg-white/5 px-3 py-1 text-sm text-white"
-                  >
-                    {d}
-                  </span>
-                ))}
-              </div>
-            </Section>
-            <Section title="Lucky Gemstones">
-              <div className="flex flex-wrap gap-2">
-                {fortune.luckyGemstones?.map((g) => (
-                  <span
-                    key={g}
-                    className="rounded-2xl border border-white/10 bg-white/5 px-3 py-1 text-sm text-white"
-                  >
-                    {g}
-                  </span>
-                ))}
-              </div>
-            </Section>
-          </div>
+          <Section title="Marriage Prediction">
+            {fortune.marriagePrediction}
+          </Section>
 
-          <Section title="Personality Traits">
-            <ul className="list-inside list-disc text-white/75">
-              {(fortune.personalityTraits || []).map((t) => (
-                <li key={t}>{t}</li>
-              ))}
-            </ul>
+          <Section title="Career & Wealth">
+            {fortune.careerWealth}
           </Section>
         </div>
       </motion.section>
 
+      {/* SHARE PANEL */}
       <motion.aside
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.05 }}
+        transition={{ duration: 0.5 }}
         className="lg:col-span-4"
       >
         <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-          <div className="text-lg font-semibold">Share your destiny</div>
-          <div className="mt-1 text-sm text-white/70">
-            Scan this QR code to reveal the same fortune on another page.
+
+          <div className="text-lg font-semibold">
+            Share your destiny
           </div>
 
-          <div className="mt-4 flex items-center justify-center rounded-3xl border border-white/10 bg-black/30 p-4">
+          <div className="mt-1 text-sm text-white/70">
+            Scan this QR to reveal the same fortune.
+          </div>
+
+          <div className="mt-4 flex justify-center">
+
             {qrCodeDataUrl ? (
               <img
                 src={qrCodeDataUrl}
-                alt="Fortune QR code"
-                className="h-48 w-48 rounded-2xl bg-white p-2"
+                alt="QR code"
+                className="h-48 w-48 rounded-xl bg-white p-2"
               />
             ) : (
-              <div className="text-sm text-white/60">
-                QR code is available when created from the form.
+              <div className="text-white/60 text-sm">
+                QR code unavailable
               </div>
             )}
+
           </div>
 
           <div className="mt-4 grid gap-2">
+
             <button
               onClick={downloadCard}
-              className="w-full rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black hover:bg-white/90"
+              className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black"
             >
               Download fortune card
             </button>
+
             <button
               onClick={shareLink}
-              className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white hover:bg-white/10"
+              className="rounded-2xl border border-white/20 px-4 py-3 text-sm font-semibold text-white"
             >
-              Share / Copy link
+              Share link
             </button>
+
             <Link
               to="/"
-              className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-white/10"
+              className="rounded-2xl border border-white/20 px-4 py-3 text-center text-sm font-semibold text-white"
             >
               Generate another
             </Link>
+
           </div>
+
         </div>
 
-        {/* Shareable card surface (used for download) */}
+        {/* CARD FOR DOWNLOAD */}
         <div className="mt-6">
+
           <div
             ref={cardRef}
-            className="rounded-[28px] border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-black/20 p-6 backdrop-blur"
+            className="rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-black/20 p-6"
           >
-            <div className="text-xs text-white/70">Destiny Wisper</div>
-            <div className="mt-2 text-2xl font-semibold tracking-tight">
+
+            <div className="text-xs text-white/70">
+              Destiny Wisper
+            </div>
+
+            <div className="mt-2 text-2xl font-semibold">
               {fortune.userName}
             </div>
-            <div className="mt-1 text-sm text-white/75">
-              Zodiac: <span className="text-white">{fortune.zodiacSign}</span>
+
+            <div className="text-sm text-white/70">
+              Zodiac: {fortune.zodiacSign}
             </div>
-            <div className="mt-4 rounded-2xl border border-white/10 bg-black/25 p-4 text-sm text-white/80">
-              <div className="font-semibold text-white">Top luck</div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {(fortune.luckyNumbers || []).slice(0, 5).map((n) => (
-                  <span
-                    key={n}
-                    className="rounded-full bg-white/10 px-3 py-1 text-white"
-                  >
-                    {n}
-                  </span>
-                ))}
-              </div>
-              <div className="mt-3 text-white/75">
-                {fortune.loveCompatibilitySummary}
-              </div>
+
+            <div className="mt-4 text-white/80">
+              {fortune.loveCompatibilitySummary}
             </div>
+
             <div className="mt-4 text-xs text-white/50">
-              Scan link: /fortune/{fortune.qrId}
+              fortune/{fortune.qrId}
             </div>
+
           </div>
+
         </div>
+
       </motion.aside>
+
     </div>
   )
 }
-
