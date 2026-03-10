@@ -1,0 +1,78 @@
+# Dependencies
+
+node_modules/
+*/node_modules/
+
+# Logs
+
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Environment variables
+
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build folders
+
+dist/
+build/
+client/dist
+client/build
+server/dist
+
+# Vite files
+
+.vite
+
+# Coverage
+
+coverage/
+
+# OS files
+
+.DS_Store
+Thumbs.db
+
+# Editor directories
+
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Cache
+
+.cache
+.parcel-cache
+
+# MongoDB database files (if local)
+
+*.db
+
+# Temporary files
+
+tmp/
+temp/
+
+# Generated QR codes or uploads
+
+uploads/
+qrcodes/
+
+# Optional
