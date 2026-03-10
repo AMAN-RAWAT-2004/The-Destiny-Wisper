@@ -130,7 +130,7 @@ export function WheelPage() {
             </motion.div>
 
             {/* Result Text */}
-            <div className="mt-4 text-center text-sm text-white/80">
+            <div className="mt-4 mb-4 text-center text-sm text-white/80">
               {result
                 ? result
                 : spinning
@@ -144,7 +144,7 @@ export function WheelPage() {
           <button
             onClick={spin}
             disabled={spinning}
-            className="mt-6 w-full rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black
+            className="mt-10 w-full rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black
             transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {spinning ? "Spinning..." : "Spin the Wheel"}
