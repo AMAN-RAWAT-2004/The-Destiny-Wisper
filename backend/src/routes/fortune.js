@@ -37,7 +37,7 @@ router.post('/fortune', async (req, res) => {
     const dailyHoroscope = buildMockHoroscope(zodiacSign, name);
 
     const qrId = uuidv4();
-    const baseUrl = process.env.PUBLIC_BASE_URL || 'http://localhost:5173';
+    const baseUrl = process.env.PUBLIC_BASE_URL || 'https://the-destiny-wisper-azus.vercel.app';
     const qrTargetUrl = `${baseUrl}/fortune/${qrId}`;
     const qrCodeDataUrl = await QRCode.toDataURL(qrTargetUrl);
 
