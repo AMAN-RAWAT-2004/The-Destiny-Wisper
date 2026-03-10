@@ -138,7 +138,7 @@ export function CompatibilityPage() {
                   label="Name"
                   value={aName}
                   onChange={(e) => setAName(e.target.value)}
-                  placeholder="e.g. Aman"
+                  placeholder="e.g. Rahul"
                 />
                 <Input
                   label="DOB"
