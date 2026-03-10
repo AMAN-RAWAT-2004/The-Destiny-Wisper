@@ -1,68 +1,82 @@
-import { motion } from 'framer-motion'
-import { useMemo, useState } from 'react'
+import { motion } from "framer-motion"
+import { useMemo, useState, useRef, useEffect } from "react"
 
 const DEFAULT_SEGMENTS = [
-  'Double luck this week',
-  'Unexpected money',
-  'New friendship',
-  'Time to rest',
-  'A bold message pays off',
-  'Small risk, big reward',
-  'Your secret talent shines',
-  'A lucky coincidence appears',
+  "Double luck this week",
+  "Unexpected money",
+  "New friendship",
+  "Time to rest",
+  "A bold message pays off",
+  "Small risk, big reward",
+  "Your secret talent shines",
+  "A lucky coincidence appears",
 ]
 
 export function WheelPage() {
-  const [spinning, setSpinning] = useState(false)
-  const [result, setResult] = useState('')
-  const [rotation, setRotation] = useState(0)
   const segments = useMemo(() => DEFAULT_SEGMENTS, [])
+  const [spinning, setSpinning] = useState(false)
+  const [result, setResult] = useState("")
+  const [rotation, setRotation] = useState(0)
+
+  const timeoutRef = useRef(null)
+
+  const segmentCount = segments.length
+  const segmentAngle = 360 / segmentCount
 
   function spin() {
     if (spinning) return
 
-    const segmentCount = segments.length
-    const segmentAngle = 360 / segmentCount
     const targetIndex = Math.floor(Math.random() * segmentCount)
 
-    // We want the chosen segment to end under the pointer at the top.
-    // Pointer is at 0deg; center of each segment is half-way into it.
-    const targetAngle = 360 * 5 + (360 - (targetIndex * segmentAngle + segmentAngle / 2))
+    // spin 5 full rotations + land on correct segment
+    const spinRotation =
+      360 * 5 +
+      (360 - (targetIndex * segmentAngle + segmentAngle / 2))
 
     setSpinning(true)
-    setResult('')
-    setRotation((prev) => prev + targetAngle)
+    setResult("")
+    setRotation((prev) => prev + spinRotation)
 
-    // Reveal text slightly after spin ends for a more physical feel.
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       setResult(segments[targetIndex])
       setSpinning(false)
     }, 2200)
   }
 
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [])
+
   return (
     <div className="grid gap-6 lg:grid-cols-12">
+      
+      {/* Wheel Section */}
       <motion.section
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
         className="lg:col-span-7"
       >
-        <h2 className="text-3xl font-semibold tracking-tight">Fortune wheel</h2>
-        <p className="mt-2 max-w-xl text-white/70">
-          Spin for a quick luck outcome. Great as a playful extra feature.
+        <h2 className="text-3xl font-semibold tracking-tight">
+          Fortune Wheel
+        </h2>
+
+        <p className="mt-2 text-white/70 max-w-xl">
+          Spin the mystical wheel and see what destiny reveals.
         </p>
 
         <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+
+          {/* Wheel Container */}
           <div className="relative mx-auto h-80 w-80">
+
             {/* Pointer */}
             <div className="pointer-events-none absolute left-1/2 top-0 z-20 -translate-x-1/2">
               <div className="h-8 w-8 -translate-y-2 rotate-180 text-amber-300 drop-shadow-[0_0_12px_rgba(251,191,36,0.7)]">
                 <svg viewBox="0 0 24 24" className="h-full w-full">
-                  <path
-                    d="M12 2L4 18h16L12 2z"
-                    fill="currentColor"
-                  />
+                  <path d="M12 2L4 18h16L12 2z" fill="currentColor"/>
                 </svg>
               </div>
             </div>
@@ -72,14 +86,18 @@ export function WheelPage() {
               animate={{ rotate: rotation }}
               transition={{
                 duration: 2,
-                ease: [0.12, 0.85, 0.21, 0.99], // slow-out easing
+                ease: [0.12, 0.85, 0.21, 0.99],
               }}
-              className="relative flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-sky-500/40 via-indigo-600/70 to-purple-700/80 shadow-[0_0_55px_rgba(56,189,248,0.7)]"
+              className="relative flex h-full w-full items-center justify-center rounded-full
+              bg-gradient-to-br from-sky-500/40 via-indigo-600/70 to-purple-700/80
+              shadow-[0_0_55px_rgba(56,189,248,0.7)]"
             >
+
               {/* Segments */}
               {segments.map((label, index) => {
-                const angle = (360 / segments.length) * index
+                const angle = segmentAngle * index
                 const isEven = index % 2 === 0
+
                 return (
                   <div
                     key={label}
@@ -87,13 +105,13 @@ export function WheelPage() {
                     style={{ transform: `rotate(${angle}deg)` }}
                   >
                     <div
-                      className={`absolute inset-y-4 right-1/2 origin-right rounded-l-full px-4 py-1.5 text-[11px] font-medium text-white/90 ${
-                        isEven ? 'bg-white/10' : 'bg-black/15'
-                      }`}
+                      className={`absolute inset-y-4 right-1/2 origin-right
+                      rounded-l-full px-4 py-1.5 text-[11px] font-medium text-white/90
+                      ${isEven ? "bg-white/10" : "bg-black/15"}`}
                     >
                       <div
-                        className="w-32 -rotate-90 text-ellipsis text-center leading-tight"
-                        style={{ transformOrigin: 'center' }}
+                        className="w-32 -rotate-90 text-center leading-tight"
+                        style={{ transformOrigin: "center" }}
                       >
                         {label}
                       </div>
@@ -108,28 +126,34 @@ export function WheelPage() {
                   SPIN
                 </div>
               </div>
+
             </motion.div>
 
-            {/* Current text */}
+            {/* Result Text */}
             <div className="mt-4 text-center text-sm text-white/80">
               {result
                 ? result
                 : spinning
-                  ? 'The wheel is listening to your luck…'
-                  : 'Tap spin to let fate choose a quick fortune.'}
+                ? "The wheel is listening to your luck…"
+                : "Tap spin to let fate choose your fortune."}
             </div>
+
           </div>
 
+          {/* Spin Button */}
           <button
             onClick={spin}
             disabled={spinning}
-            className="mt-6 w-full rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-6 w-full rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black
+            transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {spinning ? 'Spinning…' : 'Spin the wheel'}
+            {spinning ? "Spinning..." : "Spin the Wheel"}
           </button>
+
         </div>
       </motion.section>
 
+      {/* Outcome List */}
       <motion.aside
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -137,10 +161,14 @@ export function WheelPage() {
         className="lg:col-span-5"
       >
         <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-          <div className="text-lg font-semibold">Possible outcomes</div>
-          <div className="mt-1 text-sm text-white/70">
-            You can later fetch these from an API.
+          <div className="text-lg font-semibold">
+            Possible Outcomes
           </div>
+
+          <div className="mt-1 text-sm text-white/70">
+            Future versions can fetch these from the API.
+          </div>
+
           <div className="mt-5 grid gap-2">
             {segments.map((s) => (
               <div
@@ -153,7 +181,7 @@ export function WheelPage() {
           </div>
         </div>
       </motion.aside>
+
     </div>
   )
 }
-

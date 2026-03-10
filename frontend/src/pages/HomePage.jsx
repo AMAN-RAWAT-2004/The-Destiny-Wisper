@@ -174,13 +174,14 @@ export function HomePage() {
               />
               <Select
                 label="Gender (optional)"
+                
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
               >
-                <option value="">Prefer not to say</option>
-                <option value="female">Female</option>
-                <option value="male">Male</option>
-                <option value="nonbinary">Non-binary</option>
+                <option value="" className="text-black">Prefer not to say</option>
+                <option value="female" className="text-black">Female</option>
+                <option value="male" className="text-black">Male</option>
+                <option value="nonbinary" className="text-black">Non-binary</option>
               </Select>
             </div>
           )}
