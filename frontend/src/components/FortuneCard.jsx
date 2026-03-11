@@ -185,8 +185,7 @@ export function FortuneCard({ fortune }) {
   return (
     <div
       id="fortune-card"
-      className="relative overflow-hidden rounded-[34px] border border-white/18 bg-gradient-to-br from-[#120624] via-[#050517] to-black shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_0_45px_rgba(167,139,250,0.22)]"
-      style={{ width: 800, height: 1300 }}
+      className="relative mx-auto aspect-[8/13] w-full max-w-[800px] overflow-hidden rounded-[34px] border border-white/18 bg-gradient-to-br from-[#120624] via-[#050517] to-black shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_0_45px_rgba(167,139,250,0.22)]"
     >
       {/* Decorative cosmic layers (static for download) */}
       <div className="pointer-events-none absolute inset-0 opacity-80">
@@ -199,7 +198,7 @@ export function FortuneCard({ fortune }) {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:26px_26px]" />
       </div>
 
-      <div className="relative flex h-full flex-col p-8">
+      <div className="relative flex h-full flex-col p-6 sm:p-8">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>

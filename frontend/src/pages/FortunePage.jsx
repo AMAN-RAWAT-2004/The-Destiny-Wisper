@@ -323,7 +323,7 @@ export function FortunePage() {
         {/* Shareable card surface (used for download) */}
         <div className="mt-6">
           <div className="w-full overflow-auto rounded-3xl border border-white/10 bg-white/5 p-3 backdrop-blur">
-            <div ref={cardRef} className="mx-auto w-fit">
+            <div ref={cardRef} className="mx-auto max-w-full">
               <FortuneCard fortune={fortune} />
             </div>
           </div>
