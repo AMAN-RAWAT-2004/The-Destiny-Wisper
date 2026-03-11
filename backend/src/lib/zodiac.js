@@ -335,10 +335,199 @@ function buildFateMessage(zodiacSign) {
     'The next “no” you hear is actually clearing space for a louder “yes.”',
     'Your future self is proud of a boundary you are about to keep.',
     'The universe is not late—you are being paced, not punished.',
+    'An invitation that feels slightly outside your comfort zone may hold unusual importance.',
+    'You are not behind; you are exactly where your story needs you to stand for the next scene.',
   ];
 
   return `${zodiacSign} energy surrounds you. ${lines[getRandomInt(0, lines.length - 1)]}`;
 }
+
+function buildLuckyPlace() {
+  const places = [
+    'a quiet corner of a library',
+    'a sunlit bench or window seat',
+    'a bustling café where strangers’ stories cross',
+    'a rooftop or high place with a clear view',
+    'a shaded tree or small garden',
+    'a familiar street walked at an unusual hour',
+    'a place near running water',
+    'a crossroads or intersection you often pass',
+  ];
+  return places[getRandomInt(0, places.length - 1)];
+}
+
+function buildLuckyFood() {
+  const foods = [
+    'warm spiced snacks shared with friends',
+    'simple homemade comfort food',
+    'fresh fruit enjoyed slowly',
+    'a crunchy snack during a planning session',
+    'a nostalgic treat from childhood',
+  ];
+  return foods[getRandomInt(0, foods.length - 1)];
+}
+
+function buildLuckyDrink() {
+  const drinks = [
+    'cold water with a slice of lemon',
+    'herbal tea brewed with intention',
+    'a carefully prepared coffee',
+    'a fruit juice in your favorite glass',
+    'sparkling water during a quiet break',
+  ];
+  return drinks[getRandomInt(0, drinks.length - 1)];
+}
+
+function buildLuckyActivity() {
+  const acts = [
+    'writing your thoughts freely for a few minutes',
+    'taking a short walk without your phone',
+    'rearranging a small corner of your room or desk',
+    'sending a kind message you have delayed',
+    'spending ten focused minutes on something you keep postponing',
+  ];
+  return acts[getRandomInt(0, acts.length - 1)];
+}
+
+function buildDestinyScore(zodiacSign) {
+  const baseByElement = {
+    Fire: [75, 99],
+    Earth: [70, 96],
+    Air: [72, 97],
+    Water: [68, 95],
+  };
+
+  const elementMap = {
+    Aries: 'Fire',
+    Leo: 'Fire',
+    Sagittarius: 'Fire',
+    Taurus: 'Earth',
+    Virgo: 'Earth',
+    Capricorn: 'Earth',
+    Gemini: 'Air',
+    Libra: 'Air',
+    Aquarius: 'Air',
+    Cancer: 'Water',
+    Scorpio: 'Water',
+    Pisces: 'Water',
+  };
+
+  const el = elementMap[zodiacSign] || 'Air';
+  const [min, max] = baseByElement[el];
+  return getRandomInt(min, max);
+}
+
+function buildAuraColor(zodiacSign) {
+  const byElement = {
+    Fire: ['ember gold', 'sunset orange', 'crimson glow'],
+    Earth: ['forest green', 'deep moss', 'warm brown'],
+    Air: ['silver blue', 'soft lilac', 'pale yellow'],
+    Water: ['sea green', 'midnight blue', 'misty teal'],
+  };
+
+  const elementMap = {
+    Aries: 'Fire',
+    Leo: 'Fire',
+    Sagittarius: 'Fire',
+    Taurus: 'Earth',
+    Virgo: 'Earth',
+    Capricorn: 'Earth',
+    Gemini: 'Air',
+    Libra: 'Air',
+    Aquarius: 'Air',
+    Cancer: 'Water',
+    Scorpio: 'Water',
+    Pisces: 'Water',
+  };
+
+  const el = elementMap[zodiacSign] || 'Air';
+  const arr = byElement[el] || byElement.Air;
+  return arr[getRandomInt(0, arr.length - 1)];
+}
+
+function buildEnergyLevel() {
+  const levels = [
+    'Calm but quietly rising',
+    'Bright and highly magnetic',
+    'Gentle yet surprisingly focused',
+    'Dreamy but ready to act',
+    'Balanced and steady',
+  ];
+  return levels[getRandomInt(0, levels.length - 1)];
+}
+
+function buildUpcomingOpportunity(zodiacSign) {
+  const hints = [
+    'a small message or email that becomes more important than it first appears',
+    'a group project or collaboration that reveals a new talent in you',
+    'an unexpected chance to revisit something you thought you had missed',
+    'a conversation with someone you do not know well yet',
+    'a quiet moment where you finally say yes to your own idea',
+  ];
+  return `For ${zodiacSign}, an upcoming opportunity may appear as ${hints[getRandomInt(0, hints.length - 1)]}.`;
+}
+
+function generateFortune(name, dob) {
+  const zodiacSign = getZodiacSign(dob);
+  const meta = ZODIAC_META[zodiacSign] || {
+    traits: ['Mysterious', 'Unconventional'],
+    colors: ['Indigo'],
+    days: ['Sunday'],
+    gemstones: ['Quartz'],
+  };
+
+  const luckyNumbers = generateLuckyNumbers();
+  const love = buildLoveCompatibility(zodiacSign);
+  const marriagePrediction = buildMarriagePrediction();
+  const careerWealth = buildCareerWealth(zodiacSign);
+  const dailyHoroscope = buildMockHoroscope(zodiacSign, name);
+  const tarotCard = pickTarotCard(zodiacSign);
+  const luckyTime = buildLuckyTime();
+  const luckyDirection = buildLuckyDirection();
+  const luckyObject = buildLuckyObject(zodiacSign);
+  const luckySymbol = buildLuckySymbol();
+  const luckyPlace = buildLuckyPlace();
+  const luckyFood = buildLuckyFood();
+  const luckyDrink = buildLuckyDrink();
+  const luckyActivity = buildLuckyActivity();
+  const wealthScore = buildWealthScore(zodiacSign);
+  const destinyScore = buildDestinyScore(zodiacSign);
+  const auraColor = buildAuraColor(zodiacSign);
+  const energyLevel = buildEnergyLevel();
+  const personalityInsight = buildPersonalityInsight(zodiacSign);
+  const fateMessage = buildFateMessage(zodiacSign);
+  const upcomingOpportunity = buildUpcomingOpportunity(zodiacSign);
+
+  return {
+    zodiacSign,
+    personalityTraits: meta.traits,
+    luckyNumbers,
+    luckyColors: meta.colors,
+    luckyDays: meta.days,
+    luckyGemstones: meta.gemstones,
+    dailyHoroscope,
+    loveCompatibility: love,
+    marriagePrediction,
+    careerWealth,
+    tarotCard,
+    luckyTime,
+    luckyDirection,
+    luckyObject,
+    luckySymbol,
+    luckyPlace,
+    luckyFood,
+    luckyDrink,
+    luckyActivity,
+    destinyScore,
+    wealthScore,
+    auraColor,
+    energyLevel,
+    personalityInsight,
+    fateMessage,
+    upcomingOpportunity,
+  };
+}
+
 module.exports = {
   ZODIAC_META,
   getZodiacSign,
@@ -356,5 +545,14 @@ module.exports = {
   buildWealthScore,
   buildPersonalityInsight,
   buildFateMessage,
+  buildLuckyPlace,
+  buildLuckyFood,
+  buildLuckyDrink,
+  buildLuckyActivity,
+  buildDestinyScore,
+  buildAuraColor,
+  buildEnergyLevel,
+  buildUpcomingOpportunity,
+  generateFortune,
 };
 
