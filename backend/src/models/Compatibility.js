@@ -13,8 +13,17 @@ const personSchema = new mongoose.Schema(
 const compatibilitySchema = new mongoose.Schema({
   personA: personSchema,
   personB: personSchema,
-  score: Number,
+  compatibilityScore: Number,
   summary: String,
+  relationshipStyle: String,
+  attractionEnergy: String,
+  loveStrengths: String,
+  possibleChallenges: String,
+  communicationStyle: String,
+  emotionalConnection: String,
+  longTermPotential: String,
+  romanticAdvice: String,
+  bestRelationshipType: String,
   createdAt: { type: Date, default: Date.now },
 });
 

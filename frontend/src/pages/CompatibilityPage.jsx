@@ -51,6 +51,8 @@ export function CompatibilityPage() {
   const [aDob, setADob] = useState('')
   const [bName, setBName] = useState('')
   const [bDob, setBDob] = useState('')
+  const [aGender, setAGender] = useState('')
+  const [bGender, setBGender] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
@@ -88,8 +90,8 @@ export function CompatibilityPage() {
       const data = await apiFetch('/api/compatibility', {
         method: 'POST',
         body: JSON.stringify({
-          personA: { name: aName.trim(), dob: aDob },
-          personB: { name: bName.trim(), dob: bDob },
+          personA: { name: aName.trim(), dob: aDob, gender: aGender || undefined },
+          personB: { name: bName.trim(), dob: bDob, gender: bGender || undefined },
         }),
       })
       const elapsed = Date.now() - startedAt
@@ -146,6 +148,27 @@ export function CompatibilityPage() {
                   value={aDob}
                   onChange={(e) => setADob(e.target.value)}
                 />
+                <label className="block">
+                  <div className="mb-1 text-sm text-white/70">Gender</div>
+                  <select
+                    value={aGender}
+                    onChange={(e) => setAGender(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-white/25 focus:bg-white/10"
+                  >
+                    <option value="" className="text-black">
+                      Select gender
+                    </option>
+                    <option value="female" className="text-black">
+                      Female
+                    </option>
+                    <option value="male" className="text-black">
+                      Male
+                    </option>
+                    <option value="other" className="text-black">
+                      Other
+                    </option>
+                  </select>
+                </label>
               </div>
             </div>
 
@@ -166,6 +189,27 @@ export function CompatibilityPage() {
                   value={bDob}
                   onChange={(e) => setBDob(e.target.value)}
                 />
+                <label className="block">
+                  <div className="mb-1 text-sm text-white/70">Gender</div>
+                  <select
+                    value={bGender}
+                    onChange={(e) => setBGender(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-white/25 focus:bg-white/10"
+                  >
+                    <option value="" className="text-black">
+                      Select gender
+                    </option>
+                    <option value="female" className="text-black">
+                      Female
+                    </option>
+                    <option value="male" className="text-black">
+                      Male
+                    </option>
+                    <option value="other" className="text-black">
+                      Other
+                    </option>
+                  </select>
+                </label>
               </div>
             </div>
           </div>
@@ -248,15 +292,80 @@ export function CompatibilityPage() {
                 Submit two birthdays to reveal the love score here.
               </div>
             ) : (
-              <div className="mt-6">
+              <div className="mt-6 space-y-4 text-sm text-white/85">
                 <div className="flex items-center gap-5">
-                  <ScoreRing score={result.score ?? result.compatibilityScore} />
+                  <ScoreRing score={result.compatibilityScore ?? result.score ?? 0} />
                   <div>
                     <div className="text-sm text-white/70">Summary</div>
                     <div className="mt-1 text-white">
                       {result.summary || '—'}
                     </div>
                   </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-white/15 bg-black/30 p-3">
+                    <div className="text-xs text-white/70">Relationship style</div>
+                    <div className="mt-1 text-sm text-white/90">
+                      {result.relationshipStyle || '—'}
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-white/15 bg-black/30 p-3">
+                    <div className="text-xs text-white/70">Attraction energy</div>
+                    <div className="mt-1 text-sm text-white/90">
+                      {result.attractionEnergy || '—'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-white/15 bg-black/30 p-3">
+                    <div className="text-xs text-white/70">Strengths of this connection</div>
+                    <div className="mt-1 text-sm text-white/90">
+                      {result.loveStrengths || '—'}
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-white/15 bg-black/30 p-3">
+                    <div className="text-xs text-white/70">Possible challenges</div>
+                    <div className="mt-1 text-sm text-white/90">
+                      {result.possibleChallenges || '—'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-white/15 bg-black/30 p-3">
+                    <div className="text-xs text-white/70">Communication style</div>
+                    <div className="mt-1 text-sm text-white/90">
+                      {result.communicationStyle || '—'}
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-white/15 bg-black/30 p-3">
+                    <div className="text-xs text-white/70">Emotional connection</div>
+                    <div className="mt-1 text-sm text-white/90">
+                      {result.emotionalConnection || '—'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-white/15 bg-black/30 p-3">
+                  <div className="text-xs text-white/70">Long‑term potential</div>
+                  <div className="mt-1 text-sm text-white/90">
+                    {result.longTermPotential || '—'}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-white/15 bg-black/30 p-3">
+                  <div className="text-xs text-white/70">Romantic advice</div>
+                  <div className="mt-1 text-sm text-white/90">
+                    {result.romanticAdvice || '—'}
+                  </div>
+                  {result.bestRelationshipType ? (
+                    <div className="mt-2 text-xs text-white/75">
+                      Best relationship vibe:{' '}
+                      <span className="text-white/90">{result.bestRelationshipType}</span>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             )}
