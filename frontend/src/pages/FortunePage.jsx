@@ -71,6 +71,7 @@ export function FortunePage() {
     const canvas = await html2canvas(el, {
       backgroundColor: null,
       scale: 2,
+      useCORS: true,
     })
     const dataUrl = canvas.toDataURL('image/png')
     const a = document.createElement('a')

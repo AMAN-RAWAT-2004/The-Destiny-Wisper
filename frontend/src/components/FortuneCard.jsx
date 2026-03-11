@@ -185,7 +185,7 @@ export function FortuneCard({ fortune }) {
   return (
     <div
       id="fortune-card"
-      className="relative mx-auto aspect-[8/13] w-full max-w-[800px] overflow-hidden rounded-[34px] border border-white/18 bg-gradient-to-br from-[#120624] via-[#050517] to-black shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_0_45px_rgba(167,139,250,0.22)]"
+      className="relative mx-auto w-full max-w-[420px] overflow-hidden rounded-[34px] border border-white/18 bg-gradient-to-br from-[#120624] via-[#050517] to-black shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_0_45px_rgba(167,139,250,0.22)]"
     >
       {/* Decorative cosmic layers (static for download) */}
       <div className="pointer-events-none absolute inset-0 opacity-80">
@@ -198,9 +198,9 @@ export function FortuneCard({ fortune }) {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:26px_26px]" />
       </div>
 
-      <div className="relative flex h-full flex-col p-6 sm:p-8">
-        {/* Header */}
-        <div className="flex items-start justify-between">
+      <div className="relative flex min-h-[1200px] flex-col gap-5 p-6 sm:p-8">
+        {/* HEADER */}
+        <section className="flex items-start justify-between">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-white/14 bg-white/8 px-3 py-1 text-[11px] font-semibold tracking-widest text-white/90">
               <Stars className="h-3.5 w-3.5" />
@@ -218,10 +218,10 @@ export function FortuneCard({ fortune }) {
             <Badge>Aura: {fortune?.auraColor || 'mystic violet'}</Badge>
             <Badge>Energy: {fortune?.energyLevel || 'Balanced and steady'}</Badge>
           </div>
-        </div>
+        </section>
 
-        {/* User info row */}
-        <div className="mt-6 grid grid-cols-3 gap-3">
+        {/* USER INFO */}
+        <section className="mt-4 grid grid-cols-3 gap-3">
           <div className="rounded-2xl border border-white/12 bg-white/6 p-4">
             <div className="flex items-center gap-2 text-xs text-white/70">
               <User className="h-4 w-4" /> Name
@@ -246,10 +246,10 @@ export function FortuneCard({ fortune }) {
               {formatDate(fortune?.dob)}
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Main grid */}
-        <div className="mt-6 grid flex-1 grid-cols-2 gap-4">
+        {/* PERSONALITY / LUCK / LOVE / DESTINY */}
+        <section className="mt-4 grid flex-1 grid-cols-1 gap-4 md:grid-cols-2">
           <CardSection icon={WandSparkles} title="Personality">
             <div className="flex flex-wrap gap-2">
               {(fortune?.personalityTraits || []).slice(0, 6).map((t) => (
@@ -267,7 +267,7 @@ export function FortuneCard({ fortune }) {
           </CardSection>
 
           <CardSection icon={Star} title="Luck">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="grid grid-cols-3 gap-3">
               {(fortune?.luckyNumbers || []).slice(0, 7).map((n) => (
                 <LuckyNumberBubble key={n} n={n} />
               ))}
@@ -371,10 +371,10 @@ export function FortuneCard({ fortune }) {
               </div>
             </div>
           </CardSection>
-        </div>
+        </section>
 
-        {/* Future strip */}
-        <div className="mt-4 grid grid-cols-3 gap-3">
+        {/* FUTURE */}
+        <section className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
           <div className="rounded-2xl border border-white/12 bg-black/25 p-4">
             <div className="flex items-center gap-2 text-xs text-white/70">
               <Heart className="h-4 w-4" /> Marriage
@@ -399,10 +399,10 @@ export function FortuneCard({ fortune }) {
               {fortune?.upcomingOpportunity || 'A small invitation may carry big meaning.'}
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Footer */}
-        <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4 text-xs text-white/60">
+        {/* FOOTER */}
+        <section className="mt-5 flex flex-col items-start justify-between gap-2 border-t border-white/10 pt-4 text-xs text-white/60 sm:flex-row">
           <div className="inline-flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-white/70" />
             The universe whispers through subtle signs.
@@ -411,7 +411,7 @@ export function FortuneCard({ fortune }) {
             <Stars className="h-4 w-4 text-white/70" />
             The Destiny Whisper
           </div>
-        </div>
+        </section>
       </div>
     </div>
   )
