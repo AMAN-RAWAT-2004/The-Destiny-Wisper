@@ -143,6 +143,29 @@ export function FortunePage() {
           <Section title="Marriage Prediction">{fortune.marriagePrediction}</Section>
           <Section title="Career & Wealth">{fortune.careerWealth}</Section>
 
+          {typeof fortune.wealthScore === 'number' || fortune.tarotCard ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {typeof fortune.wealthScore === 'number' ? (
+                <Section title="Wealth Score 💰">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-semibold text-white">
+                      {fortune.wealthScore}
+                    </span>
+                    <span className="text-xs text-white/60">/ 100 potential this cycle</span>
+                  </div>
+                </Section>
+              ) : null}
+              {fortune.tarotCard ? (
+                <Section title="Tarot Card 🎴">
+                  <div className="font-medium text-white">{fortune.tarotCard}</div>
+                  <div className="mt-1 text-xs text-white/70">
+                    A symbolic mirror of the current chapter of your story.
+                  </div>
+                </Section>
+              ) : null}
+            </div>
+          ) : null}
+
           <div className="grid gap-4 sm:grid-cols-2">
             <Section title="Lucky Numbers">
               <div className="flex flex-wrap gap-2">
@@ -201,6 +224,49 @@ export function FortunePage() {
               ))}
             </ul>
           </Section>
+
+          {fortune.personalityInsight ? (
+            <Section title="Personality Insight 🧠">
+              <div className="text-sm text-white/80">{fortune.personalityInsight}</div>
+            </Section>
+          ) : null}
+
+          {(fortune.luckyTime || fortune.luckyDirection || fortune.luckyObject || fortune.luckySymbol) ? (
+            <Section title="Extra Luck Details">
+              <div className="grid gap-2 text-white/80 sm:grid-cols-2">
+                {fortune.luckyTime ? (
+                  <div>
+                    <span className="font-semibold">Lucky time ⏰:</span>{' '}
+                    <span>{fortune.luckyTime}</span>
+                  </div>
+                ) : null}
+                {fortune.luckyDirection ? (
+                  <div>
+                    <span className="font-semibold">Lucky direction 🧭:</span>{' '}
+                    <span>{fortune.luckyDirection}</span>
+                  </div>
+                ) : null}
+                {fortune.luckyObject ? (
+                  <div>
+                    <span className="font-semibold">Lucky object 💎:</span>{' '}
+                    <span>{fortune.luckyObject}</span>
+                  </div>
+                ) : null}
+                {fortune.luckySymbol ? (
+                  <div>
+                    <span className="font-semibold">Lucky symbol ⭐:</span>{' '}
+                    <span>{fortune.luckySymbol}</span>
+                  </div>
+                ) : null}
+              </div>
+            </Section>
+          ) : null}
+
+          {fortune.fateMessage ? (
+            <Section title="Fate Message 🔮">
+              <div className="italic text-white/85">{fortune.fateMessage}</div>
+            </Section>
+          ) : null}
         </div>
       </motion.section>
 
@@ -221,7 +287,7 @@ export function FortunePage() {
               <img
                 src={qrCodeDataUrl}
                 alt="Fortune QR code"
-                className="h-48 w-48 rounded-2xl bg-white p-2"
+                className="h-48 w-48 max-w-full rounded-2xl bg-white p-2"
               />
             ) : (
               <div className="text-sm text-white/60">

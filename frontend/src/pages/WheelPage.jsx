@@ -67,10 +67,10 @@ export function WheelPage() {
           Spin the mystical wheel and see what destiny reveals.
         </p>
 
-        <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+          <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
 
           {/* Wheel Container */}
-          <div className="relative mx-auto h-80 w-80">
+          <div className="relative mx-auto h-64 w-64 sm:h-72 sm:w-72 lg:h-80 lg:w-80 max-w-full">
 
             {/* Pointer */}
             <div className="pointer-events-none absolute left-1/2 top-0 z-20 -translate-x-1/2">
@@ -130,7 +130,7 @@ export function WheelPage() {
             </motion.div>
 
             {/* Result Text */}
-            <div className="mt-4 mb-4 text-center text-sm text-white/80">
+            <div className="mt-4 text-center text-sm text-white/80">
               {result
                 ? result
                 : spinning
@@ -144,7 +144,7 @@ export function WheelPage() {
           <button
             onClick={spin}
             disabled={spinning}
-            className="mt-10 w-full rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black
+            className="mt-6 w-full rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black
             transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {spinning ? "Spinning..." : "Spin the Wheel"}

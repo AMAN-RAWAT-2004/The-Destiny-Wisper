@@ -10,6 +10,14 @@ const {
   buildLoveCompatibility,
   buildMarriagePrediction,
   buildCareerWealth,
+  pickTarotCard,
+  buildLuckyTime,
+  buildLuckyDirection,
+  buildLuckyObject,
+  buildLuckySymbol,
+  buildWealthScore,
+  buildPersonalityInsight,
+  buildFateMessage,
 } = require('../lib/zodiac');
 
 const router = express.Router();
@@ -35,6 +43,14 @@ router.post('/fortune', async (req, res) => {
     const marriagePrediction = buildMarriagePrediction();
     const careerWealth = buildCareerWealth(zodiacSign);
     const dailyHoroscope = buildMockHoroscope(zodiacSign, name);
+    const tarotCard = pickTarotCard(zodiacSign);
+    const luckyTime = buildLuckyTime();
+    const luckyDirection = buildLuckyDirection();
+    const luckyObject = buildLuckyObject(zodiacSign);
+    const luckySymbol = buildLuckySymbol();
+    const wealthScore = buildWealthScore(zodiacSign);
+    const personalityInsight = buildPersonalityInsight(zodiacSign);
+    const fateMessage = buildFateMessage(zodiacSign);
 
     const qrId = uuidv4();
     const baseUrl = process.env.PUBLIC_BASE_URL || 'https://the-destiny-wisper-azus.vercel.app';
@@ -56,6 +72,14 @@ router.post('/fortune', async (req, res) => {
       luckyDays: meta.days,
       luckyGemstones: meta.gemstones,
       personalityTraits: meta.traits,
+      tarotCard,
+      luckyTime,
+      luckyDirection,
+      luckyObject,
+      luckySymbol,
+      wealthScore,
+      personalityInsight,
+      fateMessage,
       qrId,
     });
 
