@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { apiFetch } from '../lib/api.js'
 import { CrystalBall } from '../components/CrystalBall.jsx'
+import { FortuneCard } from '../components/FortuneCard.jsx'
 
 function Pill({ children }) {
   return (
@@ -65,15 +66,16 @@ export function FortunePage() {
   }, [id, initial])
 
   async function downloadCard() {
-    if (!cardRef.current) return
-    const canvas = await html2canvas(cardRef.current, {
+    const el = document.querySelector('#fortune-card') || cardRef.current
+    if (!el) return
+    const canvas = await html2canvas(el, {
       backgroundColor: null,
       scale: 2,
     })
     const dataUrl = canvas.toDataURL('image/png')
     const a = document.createElement('a')
     a.href = dataUrl
-    a.download = `fortune-${fortune?.userName || 'destiny'}.png`
+    a.download = `destiny-whisper-fortune-${fortune?.userName || 'destiny'}.png`
     a.click()
   }
 
@@ -320,35 +322,9 @@ export function FortunePage() {
 
         {/* Shareable card surface (used for download) */}
         <div className="mt-6">
-          <div
-            ref={cardRef}
-            className="rounded-[28px] border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-black/20 p-6 backdrop-blur"
-          >
-            <div className="text-xs text-white/70">Destiny Wisper</div>
-            <div className="mt-2 text-2xl font-semibold tracking-tight">
-              {fortune.userName}
-            </div>
-            <div className="mt-1 text-sm text-white/75">
-              Zodiac: <span className="text-white">{fortune.zodiacSign}</span>
-            </div>
-            <div className="mt-4 rounded-2xl border border-white/10 bg-black/25 p-4 text-sm text-white/80">
-              <div className="font-semibold text-white">Top luck</div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {(fortune.luckyNumbers || []).slice(0, 5).map((n) => (
-                  <span
-                    key={n}
-                    className="rounded-full bg-white/10 px-3 py-1 text-white"
-                  >
-                    {n}
-                  </span>
-                ))}
-              </div>
-              <div className="mt-3 text-white/75">
-                {fortune.loveCompatibilitySummary}
-              </div>
-            </div>
-            <div className="mt-4 text-xs text-white/50">
-              Scan link: /fortune/{fortune.qrId}
+          <div className="w-full overflow-auto rounded-3xl border border-white/10 bg-white/5 p-3 backdrop-blur">
+            <div ref={cardRef} className="mx-auto w-fit">
+              <FortuneCard fortune={fortune} />
             </div>
           </div>
         </div>
