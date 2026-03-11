@@ -1,5 +1,6 @@
 const express = require('express');
 const { getZodiacSign, getRandomInt } = require('../lib/zodiac');
+const Compatibility = require('../models/Compatibility');
 
 const router = express.Router();
 
@@ -53,6 +54,25 @@ router.post('/compatibility', async (req, res) => {
       `Strong in ${bestAreas[getRandomInt(0, bestAreas.length - 1)]}, ` +
       `watch ${challenges[getRandomInt(0, challenges.length - 1)]}. ` +
       `(${signA} + ${signB})`;
+    
+    const doc = new Compatibility({
+      personA: {
+        name: personA.name || null,
+        dob: personA.dob || null,
+        gender: personA.gender || null,
+        zodiacSign: signA,
+      },
+      personB: {
+        name: personB.name || null,
+        dob: personB.dob || null,
+        gender: personB.gender || null,
+        zodiacSign: signB,
+      },
+      score,
+      summary,
+    });
+
+    await doc.save();
 
     return res.json({
       score,
