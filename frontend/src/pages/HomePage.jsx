@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api.js'
 import { CrystalBall } from '../components/CrystalBall.jsx'
+import { FortuneLoadingScreen } from '../components/FortuneLoadingScreen.jsx'
 
 function Input({ label, ...props }) {
   return (
@@ -37,33 +38,18 @@ export function HomePage() {
   const [gender, setGender] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
-  const loadingPhrases = [
-    'Consulting the stars about you…',
-    'Guessing your next lucky twist…',
-    'Whispering your destiny to the cosmos…',
-    'Aligning your zodiac and numbers…',
-  ]
-  const [loadingIndex, setLoadingIndex] = useState(0)
+  const [showLoadingScreen, setShowLoadingScreen] = useState(false)
+  const [pendingData, setPendingData] = useState(null)
+  const [pendingQrId, setPendingQrId] = useState(null)
 
   const canSubmit = useMemo(() => name.trim().length >= 2 && !!dob, [name, dob])
-
-  useEffect(() => {
-    if (!loading) return
-    setLoadingIndex(0)
-    const id = setInterval(() => {
-      setLoadingIndex((prev) => (prev + 1) % loadingPhrases.length)
-    }, 1400)
-    return () => clearInterval(id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading])
 
   async function onSubmit(e) {
     e.preventDefault()
     setError('')
     setLoading(true)
+    setShowLoadingScreen(true)
     try {
-      const startedAt = Date.now()
       const data = await apiFetch('/api/fortune', {
         method: 'POST',
         body: JSON.stringify({
@@ -74,19 +60,29 @@ export function HomePage() {
       })
       const qrId = data?.fortune?.qrId
       if (!qrId) throw new Error('Missing qrId from server response.')
-
-      const elapsed = Date.now() - startedAt
-      const minimumMs = 5000
-      if (elapsed < minimumMs) {
-        await new Promise((resolve) => setTimeout(resolve, minimumMs - elapsed))
-      }
-
-      nav(`/fortune/${qrId}`, { state: data })
+      setPendingData(data)
+      setPendingQrId(qrId)
     } catch (err) {
       setError(err?.message || 'Failed to generate fortune.')
+      setShowLoadingScreen(false)
     } finally {
       setLoading(false)
     }
+  }
+
+  if (showLoadingScreen) {
+    return (
+      <FortuneLoadingScreen
+        hasResult={!!pendingQrId}
+        onDone={() => {
+          if (pendingQrId && pendingData) {
+            nav(`/fortune/${pendingQrId}`, { state: pendingData })
+          } else {
+            setShowLoadingScreen(false)
+          }
+        }}
+      />
+    )
   }
 
   return (
@@ -147,17 +143,7 @@ export function HomePage() {
             Fun predictions generated from your birth date.
           </div>
 
-          {loading ? (
-            <div className="mt-6 flex flex-col items-center gap-4 py-4">
-              <CrystalBall size={120} />
-              <div className="text-sm text-white/80">
-                {loadingPhrases[loadingIndex]}
-              </div>
-              <div className="text-xs text-white/50">
-                This may take about five seconds…
-              </div>
-            </div>
-          ) : (
+          {!loading && (
             <div className="mt-5 grid gap-4">
               <Input
                 label="Name"

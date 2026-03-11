@@ -46,3 +46,50 @@ body {
   }
 }
 
+/* Fortune loading clouds */
+.fortune-cloud {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.5), transparent 60%);
+  filter: blur(60px);
+  animation: floatCloud 10s ease-in-out infinite alternate;
+}
+
+@keyframes floatCloud {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -30px, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.fortune-sparkle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(244, 244, 255, 0.95), transparent 60%);
+  box-shadow: 0 0 12px rgba(248, 250, 252, 0.85);
+  animation: sparklePulse 2.6s ease-in-out infinite;
+}
+
+@keyframes sparklePulse {
+  0% {
+    opacity: 0.2;
+    transform: scale(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.15;
+    transform: scale(0.6);
+  }
+}
+
