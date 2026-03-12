@@ -24,6 +24,13 @@ const compatibilitySchema = new mongoose.Schema({
   longTermPotential: String,
   romanticAdvice: String,
   bestRelationshipType: String,
+  romanticMoment: String,
+  cosmicInsight: String,
+  destinyMessage: String,
+  emotionalGrowthTheme: String,
+  bondingExperience: String,
+  soulmateSignal: String,
+  dynamicPhrase: String,
   createdAt: { type: Date, default: Date.now },
 });
 

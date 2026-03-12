@@ -1,8 +1,25 @@
 const express = require('express');
 const { getZodiacSign, getRandomInt } = require('../lib/zodiac');
+const { generateLoveCompatibility } = require('../lib/loveCompatibilityEngine');
 const Compatibility = require('../models/Compatibility');
 
 const router = express.Router();
+
+router.get('/compatibility/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const doc = await Compatibility.findById(id).lean();
+    if (!doc) return res.status(404).json({ error: 'Compatibility reading not found.' });
+    return res.json({
+      compatibilityId: String(doc._id),
+      ...doc,
+      id: String(doc._id),
+    });
+  } catch (err) {
+    console.error('Error fetching compatibility', err);
+    return res.status(500).json({ error: 'Failed to fetch compatibility reading.' });
+  }
+});
 
 router.post('/compatibility', async (req, res) => {
   try {
@@ -48,75 +65,26 @@ router.post('/compatibility', async (req, res) => {
       `watch ${challenges[getRandomInt(0, challenges.length - 1)]}. ` +
       `(${signA} + ${signB})`;
 
-    // Richer compatibility text pools
-    const relStyles = [
-      'passionate and energetic',
-      'balanced and emotionally supportive',
-      'playful and adventurous',
-      'deeply intuitive and romantic',
-      'light-hearted yet quietly loyal',
-    ];
-    const attractionEnergyPool = [
-      'Strong physical chemistry that sparks quickly',
-      'A gentle pull that grows stronger over time',
-      'Magnetic mental and emotional attraction',
-      'Chemistry that flares when you share honest truth',
-    ];
-    const communicationStyles = [
-      'You communicate best when both of you slow down and truly listen.',
-      'Conversations between you can easily spark creativity and excitement.',
-      'Honest emotional expression will strengthen your bond.',
-      'Short daily check-ins keep you aligned and feeling seen.',
-      'You thrive when difficult topics are approached with softness, not pressure.',
-    ];
-    const loveStrengths = [
-      'You both bring out each other’s confidence.',
-      'There is strong emotional curiosity between you.',
-      'You inspire each other to grow beyond old limits.',
-      'Your connection can feel like friendship and romance at the same time.',
-      'You naturally find small rituals that make the bond feel special.',
-    ];
-    const possibleChallenges = [
-      'Both partners may need to practice patience when stressed.',
-      'Misunderstandings could arise if emotions are hidden.',
-      'Balancing independence and closeness will be important.',
-      'You may need to remember that you are on the same team during conflict.',
-      'Overthinking could cloud what is actually simple and kind between you.',
-    ];
-    const emotionalConnections = [
-      'You are capable of a deep, healing emotional connection if trust is nurtured.',
-      'Your emotional bond may start softly but can become very strong over time.',
-      'You sense each other’s moods more than you realise—use that awareness gently.',
-      'When you feel safe, it becomes easy to share fears and dreams with each other.',
-    ];
-    const longTermPotentials = [
-      'Long-term potential is strong if you keep choosing honest communication.',
-      'This connection can last if both of you grow without trying to control each other.',
-      'With shared goals and mutual respect, this bond can feel like home.',
-      'Long-term, this pairing can teach both of you what loyal partnership truly means.',
-    ];
-    const romanticAdvicePool = [
-      'Slow down your reactions and speed up your reassurance.',
-      'Say the kind thing you are thinking instead of waiting for the perfect moment.',
-      'Celebrate small moments together; they become the foundation of bigger love.',
-      'Choose curiosity over assumptions when something feels off.',
-    ];
-    const bestRelationshipTypes = [
-      'Supportive best friends with romantic spark',
-      'Partners in growth and shared adventures',
-      'Gentle healers for each other’s hearts',
-      'Creative collaborators building a life together',
-    ];
-
-    const relationshipStyle = relStyles[getRandomInt(0, relStyles.length - 1)];
-    const attractionEnergy = attractionEnergyPool[getRandomInt(0, attractionEnergyPool.length - 1)];
-    const loveStrengthsText = loveStrengths[getRandomInt(0, loveStrengths.length - 1)];
-    const possibleChallengesText = possibleChallenges[getRandomInt(0, possibleChallenges.length - 1)];
-    const communicationStyle = communicationStyles[getRandomInt(0, communicationStyles.length - 1)];
-    const emotionalConnection = emotionalConnections[getRandomInt(0, emotionalConnections.length - 1)];
-    const longTermPotential = longTermPotentials[getRandomInt(0, longTermPotentials.length - 1)];
-    const romanticAdvice = romanticAdvicePool[getRandomInt(0, romanticAdvicePool.length - 1)];
-    const bestRelationshipType = bestRelationshipTypes[getRandomInt(0, bestRelationshipTypes.length - 1)];
+    const reading = generateLoveCompatibility(signA, signB);
+    const {
+      relationshipStyle,
+      attractionEnergy,
+      loveStrengths: loveStrengthsText,
+      possibleChallenges: possibleChallengesText,
+      communicationStyle,
+      emotionalConnection,
+      longTermPotential,
+      romanticAdvice,
+      bestRelationshipType,
+      romanticMoment,
+      cosmicInsight,
+      destinyMessage,
+      // Extra optional fields (frontend can ignore safely)
+      emotionalGrowthTheme,
+      bondingExperience,
+      soulmateSignal,
+      dynamicPhrase,
+    } = reading;
 
     const doc = new Compatibility({
       personA: {
@@ -142,11 +110,20 @@ router.post('/compatibility', async (req, res) => {
       longTermPotential,
       romanticAdvice,
       bestRelationshipType,
+      romanticMoment,
+      cosmicInsight,
+      destinyMessage,
+      emotionalGrowthTheme,
+      bondingExperience,
+      soulmateSignal,
+      dynamicPhrase,
     });
 
     await doc.save();
 
     return res.json({
+      compatibilityId: String(doc._id),
+      id: String(doc._id),
       compatibilityScore: score,
       score,
       summary,
@@ -159,6 +136,13 @@ router.post('/compatibility', async (req, res) => {
       longTermPotential,
       romanticAdvice,
       bestRelationshipType,
+      romanticMoment,
+      cosmicInsight,
+      destinyMessage,
+      emotionalGrowthTheme,
+      bondingExperience,
+      soulmateSignal,
+      dynamicPhrase,
       personA: { ...personA, zodiacSign: signA },
       personB: { ...personB, zodiacSign: signB },
     });

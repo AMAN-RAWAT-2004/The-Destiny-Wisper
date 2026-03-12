@@ -1,5 +1,8 @@
 import { motion } from 'framer-motion'
-import { useEffect, useMemo, useState } from 'react'
+import html2canvas from 'html2canvas'
+import { QRCodeCanvas } from 'qrcode.react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { apiFetch } from '../lib/api.js'
 
 function Input({ label, ...props }) {
@@ -47,6 +50,10 @@ function ScoreRing({ score }) {
 }
 
 export function CompatibilityPage() {
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const rid = searchParams.get('rid')?.trim() || ''
+
   const [aName, setAName] = useState('')
   const [aDob, setADob] = useState('')
   const [bName, setBName] = useState('')
@@ -56,12 +63,15 @@ export function CompatibilityPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
+  const [downloading, setDownloading] = useState(false)
+  const cardRef = useRef(null)
 
   const lovePhrases = [
-    'Asking the universe about your hearts…',
+    'Scrying the crystal for your hearts…',
+    'Listening for Venus in the dark…',
     'Measuring the distance between your stars…',
-    'Checking if your signs spark fireworks…',
-    'Whispering your names to Venus…',
+    'Tracing your constellations across the sky…',
+    'Asking the universe what your love is here to learn…',
   ]
   const [loveIndex, setLoveIndex] = useState(0)
 
@@ -75,10 +85,35 @@ export function CompatibilityPage() {
     setLoveIndex(0)
     const id = setInterval(() => {
       setLoveIndex((prev) => (prev + 1) % lovePhrases.length)
-    }, 1500)
+    }, 1400)
     return () => clearInterval(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading])
+
+  useEffect(() => {
+    if (!rid) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        setError('')
+        setLoading(true)
+        const data = await apiFetch(
+          `/api/compatibility/${encodeURIComponent(rid)}`,
+        )
+        if (cancelled) return
+        setResult(data)
+      } catch (err) {
+        if (cancelled) return
+        setResult(null)
+        setError(err?.message || 'Failed to load this compatibility reading.')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [rid])
 
   async function onSubmit(e) {
     e.preventDefault()
@@ -95,20 +130,53 @@ export function CompatibilityPage() {
         }),
       })
       const elapsed = Date.now() - startedAt
-      const minimumMs = 5000
+      const minimumMs = 3500
       if (elapsed < minimumMs) {
         await new Promise((resolve) => setTimeout(resolve, minimumMs - elapsed))
       }
       setResult(data)
+      if (data?.compatibilityId) {
+        navigate(`/compatibility?rid=${encodeURIComponent(data.compatibilityId)}`)
+      }
     } catch (err) {
-      setError(
-        err?.message ||
-          'Compatibility endpoint not available yet. (We can add it next.)',
-      )
+      setError(err?.message || 'Failed to generate compatibility reading.')
     } finally {
       setLoading(false)
     }
   }
+
+  const shareUrl = useMemo(() => {
+    if (typeof window === 'undefined') return ''
+    return window.location.href
+  }, [rid])
+
+  async function downloadCard() {
+    if (!cardRef.current) return
+    try {
+      setDownloading(true)
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: null,
+        scale: 2,
+        useCORS: true,
+      })
+      const link = document.createElement('a')
+      link.download = 'destiny-whisper-compatibility.png'
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  function tryAnother() {
+    setError('')
+    setResult(null)
+    navigate('/compatibility')
+  }
+
+  const signA = result?.personA?.zodiacSign || '—'
+  const signB = result?.personB?.zodiacSign || '—'
+  const score = result?.compatibilityScore ?? result?.score ?? 0
 
   return (
     <div className="grid gap-6 lg:grid-cols-12">
@@ -118,23 +186,19 @@ export function CompatibilityPage() {
         transition={{ duration: 0.45 }}
         className="lg:col-span-7"
       >
-        <h2 className="text-3xl font-semibold tracking-tight">
-          Love compatibility
-        </h2>
+        <h2 className="text-3xl font-semibold tracking-tight">Love compatibility</h2>
         <p className="mt-2 max-w-xl text-white/70">
-          Enter two birthdays to see how your energies blend, with a playful
-          love score and summary.
+          Enter two birthdays to reveal a mystical love reading—cosmic chemistry,
+          emotional tides, and a destiny message.
         </p>
 
         <form
           onSubmit={onSubmit}
-          className="mt-6 rounded-3xl border border-pink-400/25 bg-gradient-to-br from-fuchsia-500/20 via-slate-900/60 to-rose-500/25 p-6 backdrop-blur"
+          className="mt-6 rounded-3xl border border-white/15 bg-gradient-to-br from-indigo-950/60 via-slate-950/60 to-fuchsia-950/50 p-6 backdrop-blur"
         >
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-3xl border border-white/15 bg-black/30 p-4">
-              <div className="mb-3 text-sm font-semibold text-white/90">
-                Person A
-              </div>
+              <div className="mb-3 text-sm font-semibold text-white/90">Person A</div>
               <div className="grid gap-3">
                 <Input
                   label="Name"
@@ -173,9 +237,7 @@ export function CompatibilityPage() {
             </div>
 
             <div className="rounded-3xl border border-white/15 bg-black/30 p-4">
-              <div className="mb-3 text-sm font-semibold text-white/90">
-                Person B
-              </div>
+              <div className="mb-3 text-sm font-semibold text-white/90">Person B</div>
               <div className="grid gap-3">
                 <Input
                   label="Name"
@@ -215,26 +277,32 @@ export function CompatibilityPage() {
           </div>
 
           {error ? (
-            <div className="mt-4 rounded-2xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+            <div className="mt-4 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
               {error}
             </div>
           ) : null}
 
-          <button
-            type="submit"
-            disabled={!canSubmit || loading}
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-pink-400 px-4 py-3 text-sm font-semibold text-black shadow-lg shadow-pink-500/40 transition hover:bg-pink-300 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {loading && (
-              <span className="relative inline-flex h-5 w-5 items-center justify-center">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-300/70" />
-                <span className="relative inline-flex h-2.5 w-2.5 items-center justify-center rounded-full bg-rose-600 text-[10px] leading-none text-rose-100">
-                  ♥
-                </span>
-              </span>
-            )}
-            {loading ? 'Casting your love score…' : 'Check love compatibility'}
-          </button>
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <button
+              type="submit"
+              disabled={!canSubmit || loading}
+              className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-amber-200 via-amber-100 to-amber-200 px-5 py-3 text-sm font-semibold text-black shadow-[0_0_0_1px_rgba(255,255,255,0.18)] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {loading ? 'Casting your love reading…' : 'Reveal compatibility'}
+            </button>
+            {result ? (
+              <button
+                type="button"
+                onClick={tryAnother}
+                className="rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white/90 hover:bg-white/10"
+              >
+                Try another compatibility
+              </button>
+            ) : null}
+            <div className="text-xs text-white/60">
+              Your QR link opens the exact same saved reading.
+            </div>
+          </div>
         </form>
       </motion.section>
 
@@ -244,132 +312,129 @@ export function CompatibilityPage() {
         transition={{ duration: 0.5, delay: 0.05 }}
         className="lg:col-span-5"
       >
-        <div className="relative overflow-hidden rounded-3xl border border-pink-400/30 bg-gradient-to-br from-rose-500/25 via-slate-900/60 to-fuchsia-500/25 p-6 backdrop-blur">
-          <div className="pointer-events-none absolute -left-6 top-6 h-16 w-16">
-            <motion.div
-              animate={{ y: [0, -8, 0], scale: [1, 1.05, 1] }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-              className="flex h-full w-full items-center justify-center text-rose-300/70"
-            >
-              <span className="text-4xl">♥</span>
-            </motion.div>
-          </div>
-          <div className="pointer-events-none absolute -right-4 bottom-2 h-12 w-12">
-            <motion.div
-              animate={{ y: [0, 6, 0], scale: [1, 1.08, 1] }}
-              transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut' }}
-              className="flex h-full w-full items-center justify-center text-fuchsia-300/60"
-            >
-              <span className="text-3xl">♥</span>
-            </motion.div>
+        <div className="rounded-3xl border border-white/15 bg-gradient-to-br from-indigo-950/60 via-slate-950/60 to-fuchsia-950/50 p-6 backdrop-blur">
+          <div className="text-lg font-semibold">Love compatibility result</div>
+          <div className="mt-1 text-sm text-white/70">
+            For fun only, not a guarantee of soulmates.
           </div>
 
-          <div className="relative">
-            <div className="text-lg font-semibold">Love result</div>
-            <div className="mt-1 text-sm text-white/70">
-              For fun only, not a guarantee of soulmates.
+          {loading ? (
+            <div className="mt-6 rounded-2xl border border-white/15 bg-black/30 p-6 text-sm text-white/80">
+              <div>{lovePhrases[loveIndex]}</div>
+              <div className="mt-1 text-xs text-white/60">
+                The crystal ball is gathering your symbols…
+              </div>
             </div>
-
-            {loading ? (
-              <div className="mt-6 rounded-2xl border border-white/15 bg-black/30 p-6 text-sm text-white/80">
-                <div className="flex items-center gap-4">
-                  <div className="relative h-12 w-12">
-                    <span className="absolute inset-0 animate-ping rounded-full bg-rose-400/50" />
-                    <span className="relative flex h-full w-full items-center justify-center rounded-full bg-rose-600 text-2xl text-rose-100">
-                      ♥
-                    </span>
-                  </div>
-                  <div>
-                    <div>{lovePhrases[loveIndex]}</div>
-                    <div className="mt-1 text-xs text-white/60">
-                      Calculating how your signs dance together…
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : !result ? (
-              <div className="mt-6 rounded-2xl border border-white/15 bg-black/30 p-6 text-sm text-white/80">
-                Submit two birthdays to reveal the love score here.
-              </div>
-            ) : (
-              <div className="mt-6 space-y-4 text-sm text-white/85">
-                <div className="flex items-center gap-5">
-                  <ScoreRing score={result.compatibilityScore ?? result.score ?? 0} />
-                  <div>
-                    <div className="text-sm text-white/70">Summary</div>
-                    <div className="mt-1 text-white">
-                      {result.summary || '—'}
-                    </div>
-                  </div>
+          ) : !result ? (
+            <div className="mt-6 rounded-2xl border border-white/15 bg-black/30 p-6 text-sm text-white/80">
+              Submit two birthdays to reveal the compatibility card here.
+            </div>
+          ) : (
+            <div className="mt-6 space-y-4">
+              <div
+                ref={cardRef}
+                className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-br from-[#0a0520] via-[#06102b] to-[#240a3b] p-5 shadow-[0_20px_80px_rgba(0,0,0,0.45)]"
+              >
+                <div className="pointer-events-none absolute inset-0 opacity-80">
+                  <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-fuchsia-500/20 blur-3xl" />
+                  <div className="absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-indigo-400/20 blur-3xl" />
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(255,215,128,0.12),transparent_38%),radial-gradient(circle_at_70%_20%,rgba(232,121,249,0.12),transparent_35%),radial-gradient(circle_at_60%_80%,rgba(129,140,248,0.12),transparent_40%)]" />
+                  <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:18px_18px] opacity-40" />
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-white/15 bg-black/30 p-3">
-                    <div className="text-xs text-white/70">Relationship style</div>
-                    <div className="mt-1 text-sm text-white/90">
-                      {result.relationshipStyle || '—'}
-                    </div>
-                  </div>
-                  <div className="rounded-2xl border border-white/15 bg-black/30 p-3">
-                    <div className="text-xs text-white/70">Attraction energy</div>
-                    <div className="mt-1 text-sm text-white/90">
-                      {result.attractionEnergy || '—'}
-                    </div>
-                  </div>
-                </div>
+                <div className="pointer-events-none absolute right-4 top-4 h-20 w-20 rounded-full bg-gradient-to-br from-amber-200/25 via-white/10 to-fuchsia-400/20 blur-[1px] shadow-[0_0_40px_rgba(255,215,128,0.18)]" />
+                <div className="pointer-events-none absolute right-5 top-5 h-16 w-16 rounded-full border border-white/20 bg-white/5 backdrop-blur" />
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-white/15 bg-black/30 p-3">
-                    <div className="text-xs text-white/70">Strengths of this connection</div>
-                    <div className="mt-1 text-sm text-white/90">
-                      {result.loveStrengths || '—'}
+                <div className="relative">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="text-xs uppercase tracking-wider text-amber-100/70">
+                        The Destiny Whisper
+                      </div>
+                      <div className="mt-1 text-lg font-semibold text-white">
+                        Compatibility Card
+                      </div>
+                      <div className="mt-2 text-sm text-white/80">
+                        <span className="text-white/70">Zodiac signs:</span>{' '}
+                        <span className="font-semibold text-white/95">{signA}</span>{' '}
+                        <span className="text-white/45">×</span>{' '}
+                        <span className="font-semibold text-white/95">{signB}</span>
+                      </div>
                     </div>
+                    <ScoreRing score={score} />
                   </div>
-                  <div className="rounded-2xl border border-white/15 bg-black/30 p-3">
-                    <div className="text-xs text-white/70">Possible challenges</div>
-                    <div className="mt-1 text-sm text-white/90">
-                      {result.possibleChallenges || '—'}
-                    </div>
-                  </div>
-                </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-white/15 bg-black/30 p-3">
-                    <div className="text-xs text-white/70">Communication style</div>
-                    <div className="mt-1 text-sm text-white/90">
-                      {result.communicationStyle || '—'}
+                  <div className="mt-4 grid gap-3 text-sm text-white/90">
+                    <div className="rounded-2xl border border-white/10 bg-black/25 p-3">
+                      <div className="text-xs text-white/70">Romantic chemistry</div>
+                      <div className="mt-1">{result.attractionEnergy || '—'}</div>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-black/25 p-3">
+                      <div className="text-xs text-white/70">Emotional connection</div>
+                      <div className="mt-1">{result.emotionalConnection || '—'}</div>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-2xl border border-white/10 bg-black/25 p-3">
+                        <div className="text-xs text-white/70">Strengths</div>
+                        <div className="mt-1">{result.loveStrengths || '—'}</div>
+                      </div>
+                      <div className="rounded-2xl border border-white/10 bg-black/25 p-3">
+                        <div className="text-xs text-white/70">Possible challenges</div>
+                        <div className="mt-1">
+                          {result.possibleChallenges || '—'}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-black/25 p-3">
+                      <div className="text-xs text-white/70">Romantic advice</div>
+                      <div className="mt-1">{result.romanticAdvice || '—'}</div>
+                    </div>
+                    <div className="rounded-2xl border border-amber-200/20 bg-gradient-to-br from-amber-200/10 via-black/15 to-fuchsia-400/10 p-3">
+                      <div className="text-xs text-amber-100/70">Destiny message</div>
+                      <div className="mt-1">{result.destinyMessage || '—'}</div>
                     </div>
                   </div>
-                  <div className="rounded-2xl border border-white/15 bg-black/30 p-3">
-                    <div className="text-xs text-white/70">Emotional connection</div>
-                    <div className="mt-1 text-sm text-white/90">
-                      {result.emotionalConnection || '—'}
-                    </div>
-                  </div>
-                </div>
 
-                <div className="rounded-2xl border border-white/15 bg-black/30 p-3">
-                  <div className="text-xs text-white/70">Long‑term potential</div>
-                  <div className="mt-1 text-sm text-white/90">
-                    {result.longTermPotential || '—'}
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-white/15 bg-black/30 p-3">
-                  <div className="text-xs text-white/70">Romantic advice</div>
-                  <div className="mt-1 text-sm text-white/90">
-                    {result.romanticAdvice || '—'}
-                  </div>
-                  {result.bestRelationshipType ? (
-                    <div className="mt-2 text-xs text-white/75">
-                      Best relationship vibe:{' '}
-                      <span className="text-white/90">{result.bestRelationshipType}</span>
+                  {result.summary ? (
+                    <div className="mt-4 text-[11px] text-white/55">
+                      {result.summary}
                     </div>
                   ) : null}
                 </div>
               </div>
-            )}
-          </div>
+
+              <div className="rounded-2xl border border-white/15 bg-black/25 p-4">
+                <div className="text-xs uppercase tracking-wider text-white/60">
+                  QR sharing
+                </div>
+                <div className="mt-3 flex flex-col items-center gap-3 sm:flex-row sm:items-start sm:gap-5">
+                  <div className="rounded-2xl border border-white/15 bg-white p-3">
+                    <QRCodeCanvas value={shareUrl} size={160} />
+                  </div>
+                  <div className="text-sm text-white/85">
+                    <div className="font-semibold text-white/95">
+                      Scan to open this reading on your phone
+                    </div>
+                    <div className="mt-1 text-xs text-white/65">
+                      Share your destiny reading with someone special
+                    </div>
+                    <div className="mt-3 break-all text-xs text-white/55">
+                      {shareUrl}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={downloadCard}
+                disabled={downloading}
+                className="rounded-2xl bg-gradient-to-r from-amber-200 via-amber-100 to-amber-200 px-5 py-3 text-sm font-semibold text-black shadow-[0_0_0_1px_rgba(255,255,255,0.18)] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {downloading ? 'Preparing image…' : 'Download Love Compatibility Card'}
+              </button>
+            </div>
+          )}
         </div>
       </motion.aside>
     </div>
